@@ -34,7 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - deploy/README.md 三种部署方式详解
 
 ### Infrastructure
-- Apache 2.0 License
+- MIT License
 - GitHub Actions CI(JDK 8/11/17/21 矩阵跑测试)
 - GitHub Actions Release(打 tag 自动构建 amd64+arm64 镜像推到 ghcr.io)
 - Docker dev build 工作流

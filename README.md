@@ -4,7 +4,7 @@
 
 [![CI](https://github.com/ddouweb/rocketmq-mirror/actions/workflows/ci.yml/badge.svg)](https://github.com/ddouweb/rocketmq-mirror/actions/workflows/ci.yml)
 [![Release](https://github.com/ddouweb/rocketmq-mirror/actions/workflows/release.yml/badge.svg)](https://github.com/ddouweb/rocketmq-mirror/actions/workflows/release.yml)
-[![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Java](https://img.shields.io/badge/Java-8%2B-orange.svg)](https://adoptium.net/)
 [![Docker](https://img.shields.io/badge/docker-ghcr.io-blue)](https://github.com/ddouweb/rocketmq-mirror/pkgs/container/rocketmq-mirror)
 
@@ -202,4 +202,6 @@ mqmirror_active_topics{kind="subscribed"} 47
 
 ## License
 
-Apache License 2.0。详见 [LICENSE](LICENSE)。
+MIT License。详见 [LICENSE](LICENSE)。
+
+> 注:根目录 `broker.conf` 是 Apache RocketMQ(Apache 2.0)项目附带的配置文件示例,版权归 Apache Software Foundation,在本仓库中以配置参考目的保留。

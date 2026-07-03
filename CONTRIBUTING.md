@@ -80,4 +80,4 @@ docker build -t mqmirror:dev .
 
 ## 许可
 
-提交的代码默认以 [Apache 2.0](LICENSE) 许可发布。
+提交的代码默认以 [MIT](LICENSE) 许可发布。
