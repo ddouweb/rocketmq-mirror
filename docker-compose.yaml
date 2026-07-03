@@ -1,0 +1,70 @@
+services:
+  mqconsole:
+    image: apacherocketmq/rocketmq-dashboard:latest
+    container_name: rmqconsole
+    networks:
+      - rocketmq
+    environment:
+      - JAVA_OPTS=-Drocketmq.namesrv.addr=namesrv:9876 -Dcom.rocketmq.sendMessageWithVIPChannel=false
+    ports:
+      - "8080:8080" # 控制台端口
+    depends_on:
+      namesrv:
+        condition: service_healthy
+      rmqbroker:
+        condition: service_healthy
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure    
+        
+  namesrv:
+    image: apache/rocketmq:5.3.1
+    container_name: rmqnamesrv
+    ports:
+      - 9876:9876
+    networks:
+      - rocketmq
+    command: sh mqnamesrv
+    healthcheck:
+        test: ["CMD-SHELL", "ps aux | grep -v grep | grep mqnamesrv || exit 1"]
+        interval: 5s
+        retries: 5
+        start_period: 10s
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        
+  rmqbroker:
+    image: apache/rocketmq:5.3.1
+    container_name: rmqbroker
+    ports:
+      - 10909:10909
+      - 10911:10911
+      - 10912:10912
+    environment:
+      - NAMESRV_ADDR=namesrv:9876
+      - BROKER_IP1=192.168.40.164
+    volumes:
+      - ./broker.conf:/home/rocketmq/rocketmq-5.3.1/conf/broker.conf
+      - ./broker.conf:/home/rocketmq/rocketmq/conf/broker.conf
+    depends_on:
+      namesrv:
+        condition: service_healthy    
+    networks:
+      - rocketmq
+    healthcheck:
+        test: ["CMD-SHELL", "ps aux | grep -v grep | grep mqbroker || exit 1"]
+        interval: 5s
+        retries: 5
+        start_period: 10s  
+    command: sh mqbroker -c /home/rocketmq/rocketmq/conf/broker.conf
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        
+networks:
+  rocketmq:
+    driver: bridge

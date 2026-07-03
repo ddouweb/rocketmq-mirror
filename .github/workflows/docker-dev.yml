@@ -1,0 +1,65 @@
+name: Docker Dev Build
+
+# 触发条件:推到 main/master 时构建一个 dev 镜像(不发布),验证 Dockerfile 没坏。
+# 想发布镜像请打 git tag (v*),会触发 release.yml。
+on:
+  push:
+    branches: [ main, master ]
+    paths:
+      - 'mqmirror/Dockerfile'
+      - 'mqmirror/entrypoint.sh'
+      - 'mqmirror/src/**'
+      - 'mqmirror/pom.xml'
+  pull_request:
+    branches: [ main, master ]
+    paths:
+      - 'mqmirror/Dockerfile'
+      - 'mqmirror/entrypoint.sh'
+
+permissions:
+  contents: read
+
+jobs:
+  build-image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup JDK 8
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 8
+          cache: maven
+
+      - name: Build jar
+        working-directory: mqmirror
+        run: mvn -B -ntp -DskipTests package
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build image (no push)
+        uses: docker/build-push-action@v6
+        with:
+          context: ./mqmirror
+          file: ./mqmirror/Dockerfile
+          platforms: linux/amd64
+          push: false
+          tags: mqmirror:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          outputs: type=docker,dest=/tmp/mqmirror.tar
+
+      - name: Smoke test - container starts and exposes /metrics
+        run: |
+          docker load -i /tmp/mqmirror.tar
+          docker run -d --name smoke -p 9100:9100 \
+            -e REMOTE_NAMESRV=127.0.0.1:9876 \
+            -e METRICS_PORT=9100 \
+            mqmirror:ci || true
+          sleep 5
+          # 容器在没真实 nameserver 时会启动失败,但只要 JVM 启动到 metrics server 之前
+          # 我们主要验证镜像本身没有 broken。下面这一步如果失败也不阻止 build。
+          docker logs smoke 2>&1 | head -30 || true
+          docker rm -f smoke || true

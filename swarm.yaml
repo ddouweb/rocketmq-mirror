@@ -1,0 +1,113 @@
+# Docker Swarm 部署示例:跨 host 用 iptables DNAT 访问远程 RocketMQ broker
+# 适合:开发/测试环境把生产 RocketMQ 数据实时回流到本地
+
+services:
+  mqconsole:
+    image: apacherocketmq/rocketmq-dashboard:latest
+    environment:
+      - JAVA_OPTS=-Drocketmq.namesrv.addr=namesrv:9876 -Dcom.rocketmq.sendMessageWithVIPChannel=false
+    ports:
+      - "8080:8080"  # 控制台端口
+    depends_on:
+      - namesrv
+      - rmqbroker
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+
+  namesrv:
+    image: apache/rocketmq:5.3.1
+    ports:
+      - 9876:9876
+    command: sh mqnamesrv
+    healthcheck:
+      test: ["CMD-SHELL", "ps aux | grep -v grep | grep mqnamesrv || exit 1"]
+      interval: 5s
+      retries: 5
+      start_period: 10s
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+
+  rmqbroker:
+    image: apache/rocketmq:5.3.1
+    ports:
+      - 10909:10909
+      - 10911:10911
+      - 10912:10912
+    environment:
+      - NAMESRV_ADDR=namesrv:9876
+      - BROKER_IP1=192.168.40.164
+    volumes:
+      - ./broker.conf:/home/rocketmq/rocketmq-5.3.1/conf/broker.conf
+      - ./broker.conf:/home/rocketmq/rocketmq/conf/broker.conf
+      - ./data/store:/home/rocketmq/store
+    depends_on:
+      - namesrv
+    healthcheck:
+      test: ["CMD-SHELL", "ps aux | grep -v grep | grep mqbroker || exit 1"]
+      interval: 5s
+      retries: 5
+      start_period: 10s
+    command: sh mqbroker -c /home/rocketmq/rocketmq/conf/broker.conf
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+
+  mqmirror:
+    image: rocketmq-mirror:latest
+    cap_add:
+      - NET_ADMIN   # 给 iptables 用,如果不用 DNAT 可去掉
+    environment:
+      # === 必填 ===
+      - REMOTE_NAMESRV=192.168.8.130:9876   # 远端(生产)nameserver
+      - LOCAL_NAMESRV=namesrv:9876          # 本地 nameserver
+
+      # === 消费组 ===
+      - CONSUMER_GROUP=mirror-consumer
+      - PRODUCER_GROUP=mirror-producer
+
+      # === topic 同步策略 ===
+      - REFRESH_SEC=30
+      # 白名单:留空 = 镜像全部业务 topic;填了就只镜像这些
+      # - TOPIC_WHITELIST=p2_v1_patrol_alarm,p2_v1_patrol_point_result
+
+      # === 消费语义 ===
+      # CONSUME_FROM: last | first | timestamp | stored
+      # - last   只消费启动后的新消息(默认)
+      # - first  从队列最早开始消费
+      # - timestamp 从 CONSUME_TIMESTAMP 毫秒时间戳开始
+      # - stored 用 broker 上记录的消费位点(同 last 的回退行为)
+      - CONSUME_FROM=last
+      # - CONSUME_TIMESTAMP=1719500000000
+
+      # ON_FAILURE: reconsume | skip | halt
+      # - reconsume 失败的消息稍后重投(默认,可能造成重复消费,业务需幂等)
+      # - skip     失败就丢弃,只在指标里看到
+      # - halt     任一失败立即退出,适合严格不丢数据的场景
+      - ON_FAILURE=reconsume
+
+      # === 防环 ===
+      # 本集群 id,会打在转发出去的消息 property 上
+      # 双向同步时两侧必须设置不同的 CLUSTER_ID,否则会形成消息风暴
+      - CLUSTER_ID=local-dev
+      - LOOP_PREVENTION=true
+
+      # === 监控 ===
+      - METRICS_PORT=9100
+
+      # === iptables DNAT(可选) ===
+      # 远端 broker 在容器内 IP,客户端从 nameserver 拿到后实际连不通;
+      # 配置后会被 DNAT 到 REMOTE_BROKER_HOST_IP
+      - REMOTE_BROKER_CONTAINER_IP=192.168.1.99
+      - REMOTE_BROKER_HOST_IP=192.168.8.130
+    ports:
+      - "9100:9100"   # Prometheus /metrics
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+        delay: 10s

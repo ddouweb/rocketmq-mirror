@@ -1,0 +1,45 @@
+# Maven
+mqmirror/target/
+**/target/
+*.jar
+*.class
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+.project
+.classpath
+.settings/
+.factorypath
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# RocketMQ runtime data (整个 data 目录都是运行时数据,不提交)
+data/
+
+# broker.conf 本地化覆盖(如果有)
+broker.conf.local
+broker.conf.bak
+
+# Docker image exports (镜像导出文件,常常几百 MB,绝不提交)
+*.tar
+*.tar.gz
+*.tar.xz
+
+# Docker
+*.pid
+
+# Backup / temp
+*.bak
+*.swp
+*.tmp
+*~

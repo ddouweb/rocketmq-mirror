@@ -1,0 +1,31 @@
+# 双集群双向同步示例:每个集群各跑一个 mqmirror,数据互为镜像。
+# 关键:CLUSTER_ID 必须不同,且 LOOP_PREVENTION=true,否则会形成消息风暴。
+#
+# 此示例部署在集群 B 上,把集群 A 的消息镜像到 B;
+# 集群 A 上应部署一份镜像版,把 B 镜像到 A,CLUSTER_ID 改为 cluster-a。
+
+services:
+  mqmirror:
+    image: rocketmq-mirror:latest
+    cap_add:
+      - NET_ADMIN
+    environment:
+      - REMOTE_NAMESRV=cluster-a-namesrv:9876
+      - LOCAL_NAMESRV=cluster-b-namesrv:9876
+      - CONSUMER_GROUP=mirror-cluster-b-consumer
+      - PRODUCER_GROUP=mirror-cluster-b-producer
+      - REFRESH_SEC=30
+      - CLUSTER_ID=cluster-b            # 与对端 cluster-a 区分
+      - LOOP_PREVENTION=true            # 必须开启,否则循环放大
+      - ON_FAILURE=reconsume
+      - METRICS_PORT=9100
+      # DNAT 可选,如果两个集群网络直通则不需要
+      # - REMOTE_BROKER_CONTAINER_IP=...
+      # - REMOTE_BROKER_HOST_IP=...
+    ports:
+      - "9100:9100"
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+        delay: 10s
