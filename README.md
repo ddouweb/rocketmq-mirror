@@ -66,7 +66,7 @@ RocketMQ 的 broker 把自身 IP 直接回报给客户端,跨 Docker host / 跨�
 - ✅ **零依赖**:JDK 8 + RocketMQ client 4.9.x 即可,无 Spring/Connect
 - ✅ **动态 topic 同步**:周期拉 nameserver,自动 subscribe/unsubscribe
 - ✅ **白名单 / 全量**:配置 `TOPIC_WHITELIST` 只镜像指定 topic,不配则镜像全部业务 topic
-- ✅ **跨网络透明**:iptables DNAT 解决 broker 容器内 IP 不可达的经典痛点
+- ✅ **跨网络场景支持**:容器化部署时,iptables DNAT 解决 broker 容器内 IP 跨 host 不可达
 - ✅ **防环**:基于 cluster id 的 property 标记,双集群互镜不会形成消息风暴
 - ✅ **消费语义可选**:`CONSUME_FROM=last|first|timestamp|stored` + `ON_FAILURE=reconsume|skip|halt`
 - ✅ **Prometheus 指标**:开箱即用的 `/metrics` 端点,无第三方依赖
@@ -74,7 +74,33 @@ RocketMQ 的 broker 把自身 IP 直接回报给客户端,跨 Docker host / 跨�
 
 ---
 
-## 快速开始
+## 先判断:你适合哪种部署方式
+
+mqmirror 的部署难度,90% 取决于**远端 broker 上报的 IP 在你机器上能否直连**。先按决策树判断,避免走死胡同:
+
+```
+能 ping 通远端 broker 上报的 IP 吗?
+├── 能 ────────────> 直接 java -jar(最简)
+│                    详见 docs/STANDALONE.md
+└── 不能(典型:容器内 IP)
+    ├── 能改远端 broker.conf 加 brokerIP1=可达IP 吗?
+    │   ├── 能 ────> 改完变上一行,java -jar(治本)
+    │   └── 不能 ──> 必须用容器,NAT 自动化
+    │                ├── Docker Swarm(本文档 / swarm.yaml)
+    │                ├── Kubernetes(deploy/k8s.yaml)
+    │                └── docker-compose(本地开发)
+    └── 都不行 ────> 宿主机 + 手动 NAT(不推荐,见 STANDALONE.md)
+```
+
+完整决策树和每条路的细节见 [deploy/README.md](deploy/README.md)。
+
+---
+
+## 快速开始(容器化场景)
+
+> 如果你已经判断自己走「broker IP 可达」这条路(场景 A),直接看 [docs/STANDALONE.md](docs/STANDALONE.md) 用 `java -jar` 即可,不需要这一节。
+>
+> 这一节面向**必须用容器解决网络问题**的场景。
 
 ### 1. 构建
 
@@ -138,12 +164,16 @@ mqmirror_active_topics{kind="subscribed"} 47
 
 ## 部署
 
-详见 [deploy/README.md](deploy/README.md)。简述:
+不同部署方式难度差异很大,**先看 [deploy/README.md](deploy/README.md) 的决策树判断你的场景**。简述:
 
-- **Docker Swarm 跨主机** → 用 `swarm.yaml`(根目录),配 iptables DNAT
-- **K8s** → 用 `deploy/k8s.yaml`,无需 iptables
-- **本地 compose** → 用 `docker-compose.yaml`
-- **双向同步** → 用 `deploy/swarm-bidirectional.yaml`,CLUSTER_ID 务必不同
+| 场景 | 难度 | 文档 |
+|------|------|------|
+| broker IP 可达 → `java -jar` | ⭐ | [docs/STANDALONE.md](docs/STANDALONE.md) |
+| Docker Swarm 跨主机(iptables 自动) | ⭐⭐ | [swarm.yaml](swarm.yaml) |
+| Kubernetes(直连) | ⭐⭐ | [deploy/k8s.yaml](deploy/k8s.yaml) |
+| 本地 docker-compose(演示) | ⭐ | [docker-compose.yaml](docker-compose.yaml) |
+| 双向同步 | ⭐⭐ | [deploy/swarm-bidirectional.yaml](deploy/swarm-bidirectional.yaml) |
+| 宿主机 + 手动 NAT(不推荐) | ⭐⭐⭐⭐ | [docs/STANDALONE.md](docs/STANDALONE.md) 最后一段 |
 
 ---
 
