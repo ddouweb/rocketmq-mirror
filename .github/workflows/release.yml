@@ -26,7 +26,6 @@ jobs:
           cache: maven
 
       - name: Build jar (with tests)
-        working-directory: mqmirror
         run: mvn -B -ntp package
 
       - name: Resolve image name (lowercase)
@@ -62,8 +61,8 @@ jobs:
       - name: Build and push multi-arch image
         uses: docker/build-push-action@v6
         with:
-          context: ./mqmirror
-          file: ./mqmirror/Dockerfile
+          context: .
+          file: ./Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ steps.meta.outputs.tags }}
@@ -76,4 +75,4 @@ jobs:
         with:
           generate_release_notes: true
           files: |
-            mqmirror/target/mqmirror.jar
+            target/mqmirror.jar

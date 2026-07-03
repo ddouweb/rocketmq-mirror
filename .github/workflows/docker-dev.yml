@@ -6,15 +6,15 @@ on:
   push:
     branches: [ main, master ]
     paths:
-      - 'mqmirror/Dockerfile'
-      - 'mqmirror/entrypoint.sh'
-      - 'mqmirror/src/**'
-      - 'mqmirror/pom.xml'
+      - 'Dockerfile'
+      - 'entrypoint.sh'
+      - 'src/**'
+      - 'pom.xml'
   pull_request:
     branches: [ main, master ]
     paths:
-      - 'mqmirror/Dockerfile'
-      - 'mqmirror/entrypoint.sh'
+      - 'Dockerfile'
+      - 'entrypoint.sh'
 
 permissions:
   contents: read
@@ -33,7 +33,6 @@ jobs:
           cache: maven
 
       - name: Build jar
-        working-directory: mqmirror
         run: mvn -B -ntp -DskipTests package
 
       - name: Set up Buildx
@@ -42,8 +41,8 @@ jobs:
       - name: Build image (no push)
         uses: docker/build-push-action@v6
         with:
-          context: ./mqmirror
-          file: ./mqmirror/Dockerfile
+          context: .
+          file: ./Dockerfile
           platforms: linux/amd64
           push: false
           tags: mqmirror:ci

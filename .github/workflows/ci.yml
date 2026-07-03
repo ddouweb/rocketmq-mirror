@@ -28,7 +28,6 @@ jobs:
           cache: maven
 
       - name: Build & Test
-        working-directory: mqmirror
         run: mvn -B -ntp verify
 
       - name: Upload Surefire reports
@@ -36,5 +35,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: surefire-reports-jdk${{ matrix.java }}
-          path: mqmirror/target/surefire-reports/
+          path: target/surefire-reports/
           retention-days: 7

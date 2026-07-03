@@ -114,7 +114,6 @@ docker tag ghcr.io/ddouweb/rocketmq-mirror:latest rocketmq-mirror:latest
 **选项 B — 本地构建**:
 
 ```bash
-cd mqmirror
 mvn -DskipTests package
 docker build -t rocketmq-mirror:latest .
 ```

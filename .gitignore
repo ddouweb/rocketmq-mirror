@@ -1,6 +1,5 @@
 # Maven
-mqmirror/target/
-**/target/
+target/
 *.jar
 *.class
 

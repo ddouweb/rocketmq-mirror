@@ -134,7 +134,6 @@ docker compose up -d
 
 构建本地镜像:
 ```bash
-cd mqmirror
 mvn -DskipTests package
 docker build -t rocketmq-mirror:latest .
 ```

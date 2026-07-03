@@ -15,8 +15,8 @@
 ## 本地开发流程
 
 ```bash
-git clone https://github.com/<your-fork>/mqmirror.git
-cd mqmirror/mqmirror
+git clone https://github.com/<your-fork>/rocketmq-mirror.git
+cd rocketmq-mirror
 
 mvn test            # 跑单元测试
 mvn package         # 打包(包含 shade 出的 fat jar)
