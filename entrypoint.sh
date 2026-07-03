@@ -43,4 +43,4 @@ else
 fi
 
 echo "[entrypoint] starting mqmirror"
-exec /opt/java/openjdk/bin/java -jar /app/mqmirror.jar
+exec java $JAVA_OPTS -jar /app/mqmirror.jar

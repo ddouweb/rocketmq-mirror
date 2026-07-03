@@ -132,9 +132,8 @@ kubectl apply -f deploy/k8s.yaml
 docker compose up -d
 ```
 
-构建本地镜像:
+构建本地镜像(多阶段构建,不需要先 mvn package):
 ```bash
-mvn -DskipTests package
 docker build -t rocketmq-mirror:latest .
 ```
 
