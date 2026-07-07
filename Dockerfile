@@ -7,7 +7,7 @@ COPY pom.xml .
 RUN mvn -B -ntp dependency:go-offline
 
 COPY src ./src
-RUN mvn -B -ntp -DskipTests package && mv target/mqmirror-*-shaded.jar /build/mqmirror.jar
+RUN mvn -B -ntp -DskipTests package && mv target/mqmirror.jar /build/mqmirror.jar
 
 # ---- Stage 2: minimal runtime ----
 FROM eclipse-temurin:8-jre-alpine
