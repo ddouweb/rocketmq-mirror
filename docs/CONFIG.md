@@ -159,5 +159,6 @@ REMOTE_BROKER_HOST_IP=192.168.8.130,192.168.8.131
 
 - **TPS 偏低**:优先检查 producer 端是否同步等待。当前实现是同步 send,后续会加异步选项。
 - **延迟高**:看 `mqmirror_send_duration_seconds_avg`。>100ms 通常意味着本地 broker 慢或网络抖。
+- **大消息**:RocketMQ producer 默认对 >4KB 的 body 自动 zip 压缩(`compressLevel=5`),broker 存压缩态、消费端透明解压,mqmirror 无需额外配置。
 - **积压**:看 `mqmirror_consumed_total` 增速 vs `mqmirror_mirrored_total` 增速,前者高于后者说明 producer 跟不上,考虑加 mqmirror 实例(注意消费组分摊)。
 - **消费滞后**:用 RocketMQ 控制台看消费位点距离最大位点差距,而不是看 mqmirror 自身指标。

@@ -239,7 +239,6 @@ mqmirror_active_topics{kind="subscribed"} 47
 
 - [ ] 异步 send(`sendOneway` 或批量)提高 TPS
 - [ ] 顺序消息透传
-- [ ] 消息体压缩
 - [ ] 跨集群位点对齐(便于切换消费组)
 - [x] Grafana dashboard 模板(见 [grafana/](grafana/README.md))
 
