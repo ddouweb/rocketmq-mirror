@@ -7,7 +7,7 @@ services:
     environment:
       - JAVA_OPTS=-Drocketmq.namesrv.addr=namesrv:9876 -Dcom.rocketmq.sendMessageWithVIPChannel=false
     ports:
-      - "8080:8080"  # 控制台端口
+      - "8080:8082"  # 宿主机 8080 → 容器 8082(dashboard 内嵌 Tomcat 监听 8082)
     depends_on:
       - namesrv
       - rmqbroker
@@ -58,20 +58,20 @@ services:
         condition: on-failure
 
   mqmirror:
-    image: rocketmq-mirror:latest
+    image: ghcr.io/ddouweb/rocketmq-mirror:latest
     cap_add:
-      - NET_ADMIN   # 给 iptables 用,如果不用 DNAT 可去掉
+      - NET_ADMIN   # iptables 写 DNAT 规则必须有;若不用 DNAT 可去掉
     environment:
-      # === 必填 ===
+      # === 连接 ===
       - REMOTE_NAMESRV=192.168.8.130:9876   # 远端(生产)nameserver
-      - LOCAL_NAMESRV=namesrv:9876          # 本地 nameserver
+      - LOCAL_NAMESRV=namesrv:9876          # 本地 swarm 内的 nameserver
 
       # === 消费组 ===
       - CONSUMER_GROUP=mirror-consumer
       - PRODUCER_GROUP=mirror-producer
 
       # === topic 同步策略 ===
-      - REFRESH_SEC=30
+      - REFRESH_SEC=30                       # topic 列表刷新间隔(秒)
       # 白名单:留空 = 镜像全部业务 topic;填了就只镜像这些
       # - TOPIC_WHITELIST=p2_v1_patrol_alarm,p2_v1_patrol_point_result
 
@@ -99,13 +99,16 @@ services:
       # === 监控 ===
       - METRICS_PORT=9100
 
-      # === iptables DNAT(可选) ===
-      # 远端 broker 在容器内 IP,客户端从 nameserver 拿到后实际连不通;
-      # 配置后会被 DNAT 到 REMOTE_BROKER_HOST_IP
+      # === iptables DNAT(跨 host 场景必须,本地直连可注释掉)===
+      # 远端 broker 上报的容器内 IP,本机路由不到;
+      # 配置后会被 DNAT 到 REMOTE_BROKER_HOST_IP(远端物理机 IP)
       - REMOTE_BROKER_CONTAINER_IP=192.168.1.99
       - REMOTE_BROKER_HOST_IP=192.168.8.130
     ports:
       - "9100:9100"   # Prometheus /metrics
+    depends_on:
+      - namesrv
+      - rmqbroker
     deploy:
       replicas: 1
       restart_policy:

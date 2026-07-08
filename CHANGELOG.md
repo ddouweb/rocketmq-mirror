@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 顺序消息透传
 - Grafana dashboard 模板
 
-## [1.0.0] - 2026-07-03
+## [1.0.0] - 2026-07-08
 
 ### Added
 - **核心功能**:RocketMQ 跨集群消息实时镜像
