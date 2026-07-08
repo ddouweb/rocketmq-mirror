@@ -181,3 +181,5 @@ Grafana 建议:
 - 镜像 TPS = `rate(mqmirror_mirrored_total{result="success"}[1m])`
 - 失败率 = `rate(mqmirror_mirrored_total{result="failed"}[1m]) / rate(mqmirror_consumed_total[1m])`
 - 滞后告警 = `mqmirror_send_duration_seconds_avg > 1`
+
+不想手搭?直接 import 现成的 Grafana 面板,见 [`../grafana/README.md`](../grafana/README.md)。

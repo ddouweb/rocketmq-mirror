@@ -241,7 +241,7 @@ mqmirror_active_topics{kind="subscribed"} 47
 - [ ] 顺序消息透传
 - [ ] 消息体压缩
 - [ ] 跨集群位点对齐(便于切换消费组)
-- [ ] Grafana dashboard 模板
+- [x] Grafana dashboard 模板(见 [grafana/](grafana/README.md))
 
 欢迎提 issue / PR。
 
