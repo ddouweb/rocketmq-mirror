@@ -13,6 +13,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Collections;
 import java.util.List;
 
 import static mirror.MirrorConfig.OnFailure.RECONSUME;
@@ -128,7 +129,7 @@ class MessageMirroringListenerTest {
         MirrorMetrics metrics = new MirrorMetrics();
         MessageMirroringListener l = new MessageMirroringListener(producer, config(SYNC, RECONSUME), metrics);
 
-        ConsumeConcurrentlyStatus s = l.consumeMessage(List.of(msg("t", "m1")), null);
+        ConsumeConcurrentlyStatus s = l.consumeMessage(Collections.singletonList(msg("t", "m1")), null);
 
         assertEquals(ConsumeConcurrentlyStatus.CONSUME_SUCCESS, s);
         assertTrue(metrics.toPrometheusText().contains("mqmirror_mirrored_total{result=\"success\"} 1"));
@@ -142,7 +143,7 @@ class MessageMirroringListenerTest {
         MirrorMetrics metrics = new MirrorMetrics();
         MessageMirroringListener l = new MessageMirroringListener(producer, config(SYNC, RECONSUME), metrics);
 
-        ConsumeConcurrentlyStatus s = l.consumeMessage(List.of(msg("t", "m1")), null);
+        ConsumeConcurrentlyStatus s = l.consumeMessage(Collections.singletonList(msg("t", "m1")), null);
 
         assertEquals(ConsumeConcurrentlyStatus.RECONSUME_LATER, s);
         assertTrue(metrics.toPrometheusText().contains("mqmirror_mirrored_total{result=\"failed\"} 1"));
@@ -153,7 +154,7 @@ class MessageMirroringListenerTest {
         when(producer.send(any(Message.class))).thenThrow(new RemotingException("boom"));
         MessageMirroringListener l = new MessageMirroringListener(producer, config(SYNC, SKIP), new MirrorMetrics());
 
-        ConsumeConcurrentlyStatus s = l.consumeMessage(List.of(msg("t", "m1")), null);
+        ConsumeConcurrentlyStatus s = l.consumeMessage(Collections.singletonList(msg("t", "m1")), null);
 
         assertEquals(ConsumeConcurrentlyStatus.CONSUME_SUCCESS, s);
     }
@@ -169,7 +170,7 @@ class MessageMirroringListenerTest {
         MirrorMetrics metrics = new MirrorMetrics();
         MessageMirroringListener l = new MessageMirroringListener(producer, config(ASYNC, SKIP), metrics);
 
-        ConsumeConcurrentlyStatus s = l.consumeMessage(List.of(msg("t", "m1")), null);
+        ConsumeConcurrentlyStatus s = l.consumeMessage(Collections.singletonList(msg("t", "m1")), null);
 
         // 提交即乐观 ACK
         assertEquals(ConsumeConcurrentlyStatus.CONSUME_SUCCESS, s);
@@ -189,7 +190,7 @@ class MessageMirroringListenerTest {
         // 注意:即便 ON_FAILURE=reconsume,async 回调失败也无法重投
         MessageMirroringListener l = new MessageMirroringListener(producer, config(ASYNC, RECONSUME), metrics);
 
-        ConsumeConcurrentlyStatus s = l.consumeMessage(List.of(msg("t", "m1")), null);
+        ConsumeConcurrentlyStatus s = l.consumeMessage(Collections.singletonList(msg("t", "m1")), null);
 
         assertEquals(ConsumeConcurrentlyStatus.CONSUME_SUCCESS, s);
         // 模拟 broker 回失败
@@ -203,7 +204,7 @@ class MessageMirroringListenerTest {
         m.putUserProperty(MessageMirroringListener.SOURCE_CLUSTER_PROPERTY, "self");
         MessageMirroringListener l = new MessageMirroringListener(producer, config(ASYNC, SKIP), new MirrorMetrics());
 
-        ConsumeConcurrentlyStatus s = l.consumeMessage(List.of(m), null);
+        ConsumeConcurrentlyStatus s = l.consumeMessage(Collections.singletonList(m), null);
 
         assertEquals(ConsumeConcurrentlyStatus.CONSUME_SUCCESS, s);
         verify(producer, never()).send(any(Message.class), any(SendCallback.class));
@@ -216,7 +217,7 @@ class MessageMirroringListenerTest {
         MirrorMetrics metrics = new MirrorMetrics();
         MessageMirroringListener l = new MessageMirroringListener(producer, config(ONEWAY, SKIP), metrics);
 
-        ConsumeConcurrentlyStatus s = l.consumeMessage(List.of(msg("t", "m1")), null);
+        ConsumeConcurrentlyStatus s = l.consumeMessage(Collections.singletonList(msg("t", "m1")), null);
 
         assertEquals(ConsumeConcurrentlyStatus.CONSUME_SUCCESS, s);
         verify(producer).sendOneway(any(Message.class));
