@@ -4,6 +4,7 @@
 
 [![CI](https://github.com/ddouweb/rocketmq-mirror/actions/workflows/ci.yml/badge.svg)](https://github.com/ddouweb/rocketmq-mirror/actions/workflows/ci.yml)
 [![Release](https://github.com/ddouweb/rocketmq-mirror/actions/workflows/release.yml/badge.svg)](https://github.com/ddouweb/rocketmq-mirror/actions/workflows/release.yml)
+[![GitHub Release](https://img.shields.io/github/v/release/ddouweb/rocketmq-mirror)](https://github.com/ddouweb/rocketmq-mirror/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Java](https://img.shields.io/badge/Java-8%2B-orange.svg)](https://adoptium.net/)
 [![Docker](https://img.shields.io/badge/docker-ghcr.io-blue)](https://github.com/ddouweb/rocketmq-mirror/pkgs/container/rocketmq-mirror)
@@ -64,6 +65,7 @@ RocketMQ 的 broker 把自身 IP 直接回报给客户端,跨 Docker host / 跨�
 ## 特性
 
 - ✅ **零依赖**:JDK 8 + RocketMQ client 4.9.x 即可,无 Spring/Connect
+- ✅ **轻量镜像**:multi-arch(amd64 + arm64)Docker 镜像 ~120MB,基于 Azul Zulu JRE 8 alpine
 - ✅ **动态 topic 同步**:周期拉 nameserver,自动 subscribe/unsubscribe
 - ✅ **白名单 / 全量**:配置 `TOPIC_WHITELIST` 只镜像指定 topic,不配则镜像全部业务 topic
 - ✅ **跨网络场景支持**:容器化部署时,iptables DNAT 解决 broker 容器内 IP 跨 host 不可达
@@ -102,20 +104,23 @@ mqmirror 的部署难度,90% 取决于**远端 broker 上报的 IP 在你机器�
 >
 > 这一节面向**必须用容器解决网络问题**的场景。
 
-### 1. 构建
+### 1. 构建镜像
 
-**选项 A — 直接拉官方镜像**(打 tag 后 GitHub Actions 会自动构建多架构镜像):
+swarm.yaml / docker-compose.yaml 默认用官方多架构镜像(`amd64` + `arm64`,~120MB)。
+
+**选项 A — 直接拉官方镜像**(推荐):
 
 ```bash
 docker pull ghcr.io/ddouweb/rocketmq-mirror:latest
-docker tag ghcr.io/ddouweb/rocketmq-mirror:latest rocketmq-mirror:latest
 ```
 
 **选项 B — 本地构建**(多阶段构建,自动编译,不需要先 mvn package):
 
 ```bash
-docker build -t rocketmq-mirror:latest .
+docker build -t ghcr.io/ddouweb/rocketmq-mirror:latest .
 ```
+
+> 本地 build 出的镜像用 `ghcr.io/...` 这个名字,这样 swarm.yaml / docker-compose.yaml 不用改 image 字段就能直接用。
 
 ### 2. 起一套本地 RocketMQ + mqmirror
 
@@ -127,9 +132,23 @@ docker stack deploy -c swarm.yaml rocketmq
 
 ### 3. 验证
 
-打开 [http://localhost:8080](http://localhost:8080) 看 RocketMQ 控制台,应该能看到本地集群已经有了远端的 topic。
-
 打开 [http://localhost:9100/metrics](http://localhost:9100/metrics) 看 Prometheus 指标:
+
+```
+mqmirror_consumed_total 12345
+mqmirror_mirrored_total{result="success"} 12340
+mqmirror_mirrored_total{result="failed"} 5
+mqmirror_active_topics{kind="subscribed"} 47
+```
+
+想用 RocketMQ 控制台 Web UI?(默认不启动,按需拉起):
+
+```bash
+docker service scale rocket_mqconsole=1      # Swarm
+# 或 docker compose --profile console up -d mqconsole  # docker-compose
+```
+
+然后打开 [http://localhost:8080](http://localhost:8080),应该能看到本地集群已经有了远端的 topic。
 
 ```
 mqmirror_consumed_total 12345

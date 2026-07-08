@@ -127,14 +127,15 @@ kubectl apply -f deploy/k8s.yaml
 
 **适用**:本机起一套 RocketMQ 做开发,远端 RocketMQ 直接端口映射到本机,或本机回环测试。
 
-参考根目录 `../docker-compose.yaml`:
+参考根目录 `../docker-compose.yaml`,默认拉 ghcr 官方镜像:
 ```bash
 docker compose up -d
 ```
 
-构建本地镜像(多阶段构建,不需要先 mvn package):
+想用本地 build 的镜像(多阶段构建,不需要先 mvn package):
 ```bash
-docker build -t rocketmq-mirror:latest .
+docker build -t ghcr.io/ddouweb/rocketmq-mirror:latest .
+docker compose up -d
 ```
 
 ---

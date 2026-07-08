@@ -1,7 +1,11 @@
 services:
   mqconsole:
+    # RocketMQ 管理 Web UI(588MB,基于 Spring Boot + Tomcat)
+    # 默认不启动以节省资源;需要时 `docker compose --profile console up -d mqconsole`
+    # 访问 http://localhost:8080
     image: apacherocketmq/rocketmq-dashboard:latest
     container_name: rmqconsole
+    profiles: ["console"]   # 默认 up 不启动;--profile console 才拉起
     networks:
       - rocketmq
     environment:

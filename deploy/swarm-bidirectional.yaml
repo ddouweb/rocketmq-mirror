@@ -6,7 +6,7 @@
 
 services:
   mqmirror:
-    image: rocketmq-mirror:latest
+    image: ghcr.io/ddouweb/rocketmq-mirror:latest
     cap_add:
       - NET_ADMIN
     environment:

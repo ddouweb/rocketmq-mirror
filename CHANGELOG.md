@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- 部署示例(swarm / compose / bidirectional)统一用 `ghcr.io/ddouweb/rocketmq-mirror:latest` 镜像名,删掉本地 `rocketmq-mirror:latest` 别名,避免 docker tag 二次操作
+- RocketMQ dashboard(`mqconsole`)默认不启动,节省资源;Swarm 用 `replicas: 0`,docker-compose 用 `profiles: [console]`。需要时一行命令拉起
+- README 补充 multi-arch 镜像大小(~120MB)、版本号 badge、dashboard 按需启动说明
+
 ### Planned
 - 异步 send(`sendOneway` / 批量)提高 TPS
 - 顺序消息透传

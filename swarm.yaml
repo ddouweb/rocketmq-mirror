@@ -3,6 +3,9 @@
 
 services:
   mqconsole:
+    # RocketMQ 管理 Web UI(588MB,基于 Spring Boot + Tomcat)
+    # 默认不启动以节省资源;需要时 `docker service scale rocket_mqconsole=1`
+    # 访问 http://localhost:8080
     image: apacherocketmq/rocketmq-dashboard:latest
     environment:
       - JAVA_OPTS=-Drocketmq.namesrv.addr=namesrv:9876 -Dcom.rocketmq.sendMessageWithVIPChannel=false
@@ -12,7 +15,7 @@ services:
       - namesrv
       - rmqbroker
     deploy:
-      replicas: 1
+      replicas: 0   # 默认关;要用:`docker service scale rocket_mqconsole=1`
       restart_policy:
         condition: on-failure
 
