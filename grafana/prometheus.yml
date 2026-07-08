@@ -1,0 +1,18 @@
+# Prometheus 抓取配置:抓 mqmirror 的 /metrics
+# host.docker.internal 指向宿主机(docker-compose.metrics.yaml 里通过 host-gateway 映射)
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'mqmirror'
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          # mqmirror 主服务(默认 METRICS_PORT=9100)
+          - 'host.docker.internal:9100'
+          # mqmirror-test 测试服务(端口 9101);没跑就忽略,不影响主服务抓取
+          - 'host.docker.internal:9101'
+        labels:
+          service: mqmirror

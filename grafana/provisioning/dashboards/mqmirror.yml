@@ -1,0 +1,15 @@
+# Grafana dashboard provisioning:启动时自动从 /var/lib/grafana/dashboards 加载 JSON
+# docker-compose.metrics.yaml 里把 ./mqmirror-dashboard.json 挂载到了这个路径
+
+apiVersion: 1
+providers:
+  - name: 'mqmirror'
+    orgId: 1
+    folder: ''
+    type: file
+    disableDeletion: false
+    editable: true
+    updateIntervalSeconds: 30
+    options:
+      path: /var/lib/grafana/dashboards
+      foldersFromFilesStructure: false

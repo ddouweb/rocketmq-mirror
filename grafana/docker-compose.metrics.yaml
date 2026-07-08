@@ -1,0 +1,47 @@
+# 可选监控栈:Prometheus 抓取 + Grafana 展示(自动加载数据源和 mqmirror dashboard)
+#
+# 用法(在仓库根目录执行):
+#   docker compose -f grafana/docker-compose.metrics.yaml up -d
+#
+# 前提:mqmirror 已经在跑,METRICS_PORT(默认 9100)已 publish 到宿主机。
+# 本地测试的 mqmirror-test 用 9101,prometheus.yml 里两个端口都抓,互不影响。
+#
+# 访问:
+#   Grafana   http://localhost:3000  (admin / admin,首次会让你改密码,可跳过)
+#   Prometheus http://localhost:9090
+#
+# 停止:
+#   docker compose -f grafana/docker-compose.metrics.yaml down
+
+services:
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    container_name: mqmirror-prometheus
+    # Linux 下让容器能通过 host.docker.internal 访问宿主机上 publish 的 mqmirror 端口
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.retention.time=7d
+    ports:
+      - "9090:9090"
+    restart: on-failure
+
+  grafana:
+    image: grafana/grafana-oss:11.1.0
+    container_name: mqmirror-grafana
+    depends_on:
+      - prometheus
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      # provisioning:启动时自动注册 Prometheus 数据源 + 加载 dashboard
+      - ./provisioning:/etc/grafana/provisioning:ro
+      - ./mqmirror-dashboard.json:/var/lib/grafana/dashboards/mqmirror-dashboard.json:ro
+    ports:
+      - "3000:3000"
+    restart: on-failure

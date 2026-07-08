@@ -8,7 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- **Grafana dashboard 模板**(`grafana/mqmirror-dashboard.json`):10 个面板覆盖 TPS、失败率、累计计数、send 延迟、吞吐量、topic 数、错误速率。Prometheus 抓取 `/metrics` 后 import 即用
+- **Grafana dashboard 模板 + 一键监控栈**(`grafana/`):
+  - `docker-compose.metrics.yaml`:一条命令起 Prometheus + Grafana,Grafana 通过 provisioning 自动加载数据源和 dashboard,无需手动 import
+  - `mqmirror-dashboard.json`:10 个面板覆盖 TPS、失败率、累计计数、send 延迟、吞吐量、topic 数、错误速率
 
 ### Changed
 - 部署示例(swarm / compose / bidirectional)统一用 `ghcr.io/ddouweb/rocketmq-mirror:latest` 镜像名,删掉本地 `rocketmq-mirror:latest` 别名,避免 docker tag 二次操作

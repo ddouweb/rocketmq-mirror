@@ -1,14 +1,4 @@
 {
-  "__inputs": [
-    {
-      "name": "DS_PROMETHEUS",
-      "label": "Prometheus",
-      "description": "抓取 mqmirror /metrics 的 Prometheus 数据源",
-      "type": "datasource",
-      "pluginId": "prometheus",
-      "pluginName": "Prometheus"
-    }
-  ],
   "annotations": { "list": [] },
   "editable": true,
   "fiscalYearStartMonth": 0,
@@ -18,7 +8,7 @@
   "liveNow": false,
   "panels": [
     {
-      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "thresholds" },
@@ -43,7 +33,7 @@
       },
       "targets": [
         {
-          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "datasource": { "type": "prometheus", "uid": "Prometheus" },
           "expr": "sum(rate(mqmirror_mirrored_total{result=\"success\"}[1m]))",
           "legendFormat": "mirrored/s",
           "refId": "A"
@@ -53,7 +43,7 @@
       "type": "stat"
     },
     {
-      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "thresholds" },
@@ -81,7 +71,7 @@
       },
       "targets": [
         {
-          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "datasource": { "type": "prometheus", "uid": "Prometheus" },
           "expr": "sum(rate(mqmirror_mirrored_total{result=\"failed\"}[1m])) / clamp_min(sum(rate(mqmirror_consumed_total[1m])), 1)",
           "legendFormat": "fail rate",
           "refId": "A"
@@ -91,7 +81,7 @@
       "type": "stat"
     },
     {
-      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "thresholds" },
@@ -116,7 +106,7 @@
       },
       "targets": [
         {
-          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "datasource": { "type": "prometheus", "uid": "Prometheus" },
           "expr": "sum(mqmirror_mirrored_total{result=\"success\"})",
           "legendFormat": "total",
           "refId": "A"
@@ -126,7 +116,7 @@
       "type": "stat"
     },
     {
-      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "thresholds" },
@@ -151,7 +141,7 @@
       },
       "targets": [
         {
-          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "datasource": { "type": "prometheus", "uid": "Prometheus" },
           "expr": "sum(mqmirror_active_topics{kind=\"subscribed\"})",
           "legendFormat": "topics",
           "refId": "A"
@@ -161,7 +151,7 @@
       "type": "stat"
     },
     {
-      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
@@ -201,19 +191,19 @@
       },
       "targets": [
         {
-          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "datasource": { "type": "prometheus", "uid": "Prometheus" },
           "expr": "sum(rate(mqmirror_consumed_total[1m]))",
           "legendFormat": "consumed",
           "refId": "A"
         },
         {
-          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "datasource": { "type": "prometheus", "uid": "Prometheus" },
           "expr": "sum(rate(mqmirror_mirrored_total{result=\"success\"}[1m]))",
           "legendFormat": "mirrored-success",
           "refId": "B"
         },
         {
-          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "datasource": { "type": "prometheus", "uid": "Prometheus" },
           "expr": "sum(rate(mqmirror_mirrored_total{result=\"failed\"}[1m]))",
           "legendFormat": "failed",
           "refId": "C"
@@ -223,7 +213,7 @@
       "type": "timeseries"
     },
     {
-      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
@@ -253,19 +243,19 @@
       },
       "targets": [
         {
-          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "datasource": { "type": "prometheus", "uid": "Prometheus" },
           "expr": "sum(mqmirror_consumed_total)",
           "legendFormat": "consumed",
           "refId": "A"
         },
         {
-          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "datasource": { "type": "prometheus", "uid": "Prometheus" },
           "expr": "sum(mqmirror_mirrored_total{result=\"success\"})",
           "legendFormat": "mirrored-success",
           "refId": "B"
         },
         {
-          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "datasource": { "type": "prometheus", "uid": "Prometheus" },
           "expr": "sum(mqmirror_loopback_skipped_total)",
           "legendFormat": "loopback-skipped",
           "refId": "C"
@@ -275,7 +265,7 @@
       "type": "timeseries"
     },
     {
-      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
@@ -305,13 +295,13 @@
       },
       "targets": [
         {
-          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "datasource": { "type": "prometheus", "uid": "Prometheus" },
           "expr": "sum(mqmirror_send_duration_seconds)",
           "legendFormat": "last",
           "refId": "A"
         },
         {
-          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "datasource": { "type": "prometheus", "uid": "Prometheus" },
           "expr": "sum(mqmirror_send_duration_seconds_avg)",
           "legendFormat": "avg",
           "refId": "B"
@@ -321,7 +311,7 @@
       "type": "timeseries"
     },
     {
-      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
@@ -351,7 +341,7 @@
       },
       "targets": [
         {
-          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "datasource": { "type": "prometheus", "uid": "Prometheus" },
           "expr": "sum(rate(mqmirror_bytes_total[1m]))",
           "legendFormat": "bytes/s",
           "refId": "A"
@@ -361,7 +351,7 @@
       "type": "timeseries"
     },
     {
-      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
@@ -391,13 +381,13 @@
       },
       "targets": [
         {
-          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "datasource": { "type": "prometheus", "uid": "Prometheus" },
           "expr": "sum(mqmirror_active_topics{kind=\"subscribed\"})",
           "legendFormat": "subscribed",
           "refId": "A"
         },
         {
-          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "datasource": { "type": "prometheus", "uid": "Prometheus" },
           "expr": "sum(mqmirror_active_topics{kind=\"discovered\"})",
           "legendFormat": "discovered",
           "refId": "B"
@@ -407,7 +397,7 @@
       "type": "timeseries"
     },
     {
-      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
@@ -440,13 +430,13 @@
       },
       "targets": [
         {
-          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "datasource": { "type": "prometheus", "uid": "Prometheus" },
           "expr": "sum(rate(mqmirror_send_errors_total[1m]))",
           "legendFormat": "send-errors",
           "refId": "A"
         },
         {
-          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "datasource": { "type": "prometheus", "uid": "Prometheus" },
           "expr": "sum(rate(mqmirror_subscribe_errors_total[1m]))",
           "legendFormat": "subscribe-errors",
           "refId": "B"
