@@ -12,6 +12,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 顺序消息透传
 - Grafana dashboard 模板
 
+## [1.0.1] - 2026-07-08
+
+### Changed
+- **镜像 base 从 `eclipse-temurin:8-jre`(Ubuntu,~250MB)切到 `azul/zulu-openjdk-alpine:8-jre`(Alpine,~120MB)**
+  - v1.0.0 不得不切到 Ubuntu base,因为 Eclipse Temurin 的 Java 8 alpine 镜像没有 arm64 tag
+  - Azul Zulu 提供完整的 multi-arch alpine 镜像(amd64 + arm64),体积回到预期
+  - Zulu 是 TCK 认证的标准 OpenJDK build,与 Temurin 行为等价
+
 ## [1.0.0] - 2026-07-08
 
 ### Added
