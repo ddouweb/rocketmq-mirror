@@ -126,8 +126,8 @@ WantedBy=multi-user.target
 
 **Windows**:用 NSSM 或任务计划程序
 ```cmd
-:: 用 NSSM 装成服务
-nssm install mqmirror "C:\Program Files\Java\jdk-17\bin\java.exe" "-jar C:\mqmirror\mqmirror.jar"
+:: 用 NSSM 装成服务(路径换成你机器上 Java 8+ 的 java.exe)
+nssm install mqmirror "C:\Program Files\Java\jdk1.8.0_301\bin\java.exe" "-jar C:\mqmirror\mqmirror.jar"
 nssm set mqmirror AppEnvironmentExtra REMOTE_NAMESRV=prod-ns:9876 LOCAL_NAMESRV=127.0.0.1:9876 CLUSTER_ID=prod-mirror
 nssm start mqmirror
 ```

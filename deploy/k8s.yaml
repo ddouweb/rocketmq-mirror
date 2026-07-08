@@ -32,7 +32,7 @@ spec:
     spec:
       containers:
         - name: mqmirror
-          image: rocketmq-mirror:1.0.0
+          image: ghcr.io/ddouweb/rocketmq-mirror:1.0.1
           imagePullPolicy: IfNotPresent
           env:
             - name: REMOTE_NAMESRV
