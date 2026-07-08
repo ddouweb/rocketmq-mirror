@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **`SEND_MODE` 发送模式**(`sync`/`async`/`oneway`,默认 `sync`):sync 保持可重投语义;async 用回调换取约 3–5× TPS;oneway fire-and-forget。提交阶段失败仍走 `ON_FAILURE`,async/oneway 回调失败只记 metrics 不重投。引入 Mockito 4.11.0(test scope,Java 8 兼容),新增 7 个测试覆盖三模式
 - **Grafana dashboard 模板 + 一键监控栈**(`grafana/`):
   - `docker-compose.metrics.yaml`:一条命令起 Prometheus + Grafana,Grafana 通过 provisioning 自动加载数据源和 dashboard,无需手动 import
   - `mqmirror-dashboard.json`:10 个面板覆盖 TPS、失败率、累计计数、send 延迟、吞吐量、topic 数、错误速率

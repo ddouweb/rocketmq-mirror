@@ -21,6 +21,13 @@ import java.util.stream.Collectors;
  *   - CONSUME_TIMESTAMP 当 CONSUME_FROM=timestamp 时使用,毫秒时间戳
  *   - ON_FAILURE      reconsume | skip | halt,默认 reconsume
  *
+ * 发送语义:
+ *   - SEND_MODE       sync | async | oneway,默认 sync
+ *                     async/oneway 牺牲失败可重投性换取更高 TPS:
+ *                     sync   每条同步等 ACK,失败按 ON_FAILURE 处理(可重投)
+ *                     async  send(msg, callback),立即乐观 ACK,失败只在 metrics 体现(不重投)
+ *                     oneway fire-and-forget,不计失败(连提交成功都不保证)
+ *
  * 同步策略:
  *   - TOPIC_WHITELIST 逗号分隔 topic 列表,设了只镜像这些;不设则镜像所有业务 topic
  *   - REFRESH_SEC     topic 列表刷新周期,秒,默认 30
@@ -42,9 +49,11 @@ public final class MirrorConfig {
     public final boolean loopPrevention;
     public final String clusterId;
     public final int metricsPort;
+    public final SendMode sendMode;
 
     public enum ConsumeFrom { LAST, FIRST, TIMESTAMP, STORED }
     public enum OnFailure { RECONSUME, SKIP, HALT }
+    public enum SendMode { SYNC, ASYNC, ONEWAY }
 
     public MirrorConfig(
             String remoteNs,
@@ -58,7 +67,8 @@ public final class MirrorConfig {
             OnFailure onFailure,
             boolean loopPrevention,
             String clusterId,
-            int metricsPort) {
+            int metricsPort,
+            SendMode sendMode) {
         this.remoteNs = remoteNs;
         this.localNs = localNs;
         this.consumerGroup = consumerGroup;
@@ -71,6 +81,7 @@ public final class MirrorConfig {
         this.loopPrevention = loopPrevention;
         this.clusterId = clusterId;
         this.metricsPort = metricsPort;
+        this.sendMode = sendMode;
     }
 
     public static MirrorConfig fromEnv() {
@@ -88,11 +99,12 @@ public final class MirrorConfig {
         boolean loopPrevention = Boolean.parseBoolean(env("LOOP_PREVENTION", "true"));
         String clusterId = env("CLUSTER_ID", "default");
         int metricsPort = Integer.parseInt(env("METRICS_PORT", "9100"));
+        SendMode sendMode = SendMode.valueOf(env("SEND_MODE", "SYNC").toUpperCase());
 
         return new MirrorConfig(
             remoteNs, localNs, cGroup, pGroup, refreshSec, whitelist,
             consumeFrom, consumeTimestamp, onFailure,
-            loopPrevention, clusterId, metricsPort);
+            loopPrevention, clusterId, metricsPort, sendMode);
     }
 
     static Set<String> parseWhitelist(String raw) {
@@ -131,6 +143,7 @@ public final class MirrorConfig {
             ", loopPrevention=" + loopPrevention +
             ", clusterId='" + clusterId + '\'' +
             ", metricsPort=" + metricsPort +
+            ", sendMode=" + sendMode +
             '}';
     }
 }

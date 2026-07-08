@@ -71,6 +71,7 @@ RocketMQ 的 broker 把自身 IP 直接回报给客户端,跨 Docker host / 跨�
 - ✅ **跨网络场景支持**:容器化部署时,iptables DNAT 解决 broker 容器内 IP 跨 host 不可达
 - ✅ **防环**:基于 cluster id 的 property 标记,双集群互镜不会形成消息风暴
 - ✅ **消费语义可选**:`CONSUME_FROM=last|first|timestamp|stored` + `ON_FAILURE=reconsume|skip|halt`
+- ✅ **发送模式可选**:`SEND_MODE=sync|async|oneway`,sync 可重投,async/oneway 用更高 TPS 换可重投性
 - ✅ **Prometheus 指标**:开箱即用的 `/metrics` 端点,无第三方依赖
 - ✅ **多场景部署**:Swarm / K8s / docker-compose 三套示例
 
@@ -173,6 +174,7 @@ mqmirror_active_topics{kind="subscribed"} 47
 | `LOOP_PREVENTION` | `true` | 是否开启防环 |
 | `CONSUME_FROM` | `last` | 启动时从哪里开始消费 |
 | `ON_FAILURE` | `reconsume` | send 失败时如何处理 |
+| `SEND_MODE` | `sync` | 发送模式 sync/async/oneway,详见 [CONFIG.md](docs/CONFIG.md#发送语义) |
 | `METRICS_PORT` | `9100` | Prometheus 端口,设为 0 关闭 |
 | `REMOTE_BROKER_CONTAINER_IP` | 空 | iptables DNAT 用,见部署文档 |
 | `REMOTE_BROKER_HOST_IP` | 空 | iptables DNAT 用 |
@@ -237,7 +239,7 @@ mqmirror_active_topics{kind="subscribed"} 47
 
 ## Roadmap
 
-- [ ] 异步 send(`sendOneway` 或批量)提高 TPS
+- [x] 异步 send(`SEND_MODE=sync|async|oneway`,见 [CONFIG.md](docs/CONFIG.md#发送语义))
 - [ ] 顺序消息透传
 - [ ] 跨集群位点对齐(便于切换消费组)
 - [x] Grafana dashboard 模板(见 [grafana/](grafana/README.md))

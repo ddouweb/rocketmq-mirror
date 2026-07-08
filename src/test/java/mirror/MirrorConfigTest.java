@@ -60,5 +60,6 @@ class MirrorConfigTest {
         // 文档承诺的取值必须存在
         assertEquals(4, MirrorConfig.ConsumeFrom.values().length);
         assertEquals(3, MirrorConfig.OnFailure.values().length);
+        assertEquals(3, MirrorConfig.SendMode.values().length);
     }
 }

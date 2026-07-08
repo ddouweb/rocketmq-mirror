@@ -86,6 +86,31 @@ CONSUME_TIMESTAMP=1719500000000
 
 ---
 
+## 发送语义
+
+### `SEND_MODE`
+
+控制转发到本地集群时 producer 的发送方式:
+
+| 值 | 行为 | TPS | 失败处理 |
+|----|------|-----|---------|
+| `sync`(默认) | `producer.send()` 同步等每条 ACK | 基线 | 失败按 `ON_FAILURE` 处理(可重投) |
+| `async` | `producer.send(msg, callback)`,提交后立即乐观 ACK | 高(约 3–5×) | 回调失败只记 metrics,**无法重投**(消息已 ACK) |
+| `oneway` | `producer.sendOneway()`,fire-and-forget | 最高 | 不检测失败(连提交成功都不保证) |
+
+三档都遵守:**提交阶段**(`send` / `sendOneway` 本身抛异常,如 producer 未启动、网络断)的失败仍走 `ON_FAILURE`。
+
+**async / oneway 的关键取舍**:消息一旦提交,无论回调 / oneway 是否真正送达,batch 都已对 broker 返回 `CONSUME_SUCCESS`,位点前进。因此:
+- `ON_FAILURE=reconsume` 在 async / oneway 下**只能保护提交异常**,无法保护回调失败
+- 启动时若 `SEND_MODE != sync` 且 `ON_FAILURE != skip`,会打一条 WARN 日志提醒
+
+**建议**:
+- 默认 `sync`,需要可重投保证时不要改
+- 追求吞吐、业务能容忍偶发丢失(日志 / 监控类)→ `async`
+- 极限吞吐、完全不在意丢失 → `oneway`
+
+---
+
 ## 防环
 
 | 变量 | 默认 | 说明 |
@@ -157,7 +182,7 @@ REMOTE_BROKER_HOST_IP=192.168.8.130,192.168.8.131
 
 ## 调优建议
 
-- **TPS 偏低**:优先检查 producer 端是否同步等待。当前实现是同步 send,后续会加异步选项。
+- **TPS 偏低**:把 `SEND_MODE` 从 `sync` 改成 `async`(回调仍统计成功/失败,约 3–5× TPS)或 `oneway`(最快但无法检测失败)。代价是 async/oneway 的回调失败不重投,见[发送语义](#发送语义)。
 - **延迟高**:看 `mqmirror_send_duration_seconds_avg`。>100ms 通常意味着本地 broker 慢或网络抖。
 - **大消息**:RocketMQ producer 默认对 >4KB 的 body 自动 zip 压缩(`compressLevel=5`),broker 存压缩态、消费端透明解压,mqmirror 无需额外配置。
 - **积压**:看 `mqmirror_consumed_total` 增速 vs `mqmirror_mirrored_total` 增速,前者高于后者说明 producer 跟不上,考虑加 mqmirror 实例(注意消费组分摊)。

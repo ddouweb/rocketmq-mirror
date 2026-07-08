@@ -56,8 +56,15 @@ public final class MirrorApp {
             try { exporter.stop(); } catch (Exception ignore) {}
         }, "shutdown-hook"));
 
-        log.info("mqmirror is running. clusterId={} onFailure={} consumeFrom={} loopPrevention={}",
-            config.clusterId, config.onFailure, config.consumeFrom, config.loopPrevention);
+        if (config.sendMode != MirrorConfig.SendMode.SYNC
+                && config.onFailure != MirrorConfig.OnFailure.SKIP) {
+            log.warn("SEND_MODE={} with ON_FAILURE={}: async/oneway ACKs messages optimistically, "
+                + "so callback-stage failures cannot be re-delivered; only submit-stage exceptions "
+                + "honor ON_FAILURE. Set ON_FAILURE=skip to silence this.",
+                config.sendMode, config.onFailure);
+        }
+        log.info("mqmirror is running. clusterId={} sendMode={} onFailure={} consumeFrom={} loopPrevention={}",
+            config.clusterId, config.sendMode, config.onFailure, config.consumeFrom, config.loopPrevention);
         Thread.currentThread().join();
     }
 
